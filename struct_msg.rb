@@ -1,24 +1,26 @@
-#require './struct.rb'
-require 'pp'
-
-##split asn file to blocks
-items = []
-#cnt = 0
-File.open("36331-c00-asn", "r") do |f|
-  item = []
-  f.each do |line|
-    if /::=/.match(line)
-      items << item
-      item = []
-      #p cnt += 1
+#require './MsgStruct.rb'
+def file2items(file, marking, eliding=/^\s*$/)
+  items = []
+  File.open(file, "r") do |f|
+    item = []
+    f.each do |line|
+      if marking.match(line)
+        items << item
+        item = []
+        #p line
+      end
+      item << line unless eliding.match(line)
     end
-    item << line #until /^--/.match(line) #or line==nil
+    items << item  
   end
 end
 
+#split every item to {key, content[, info]} structure
 
-msgs = {}
-items.each do |item|
+#split spec asn1 items to message {key, content} pair
+def ts2msgs(keg)
+  msgs = {}
+  items.each do |item|
   if /(.*)::=(.*)/.match(item[0])
     msg_key = $1.strip
     msgs[msg_key] = []
@@ -35,7 +37,31 @@ items.each do |item|
   end
 end
 
-pp msgs
+
+
+require 'pp'
 
 
 
+
+##split asn file to blocks
+items = file2items("36331-c00-asn", /::=/)
+
+
+
+
+
+#pp msgs
+p msgs.length
+
+
+
+#15:35:50.038  [00] 
+#pp 
+log = file2items("ex_log", /\d\d:\d\d:\d\d/)
+p log.length
+
+log.each do |alog|
+  alog.each do |line|
+    if line.include(    #message tag
+        
